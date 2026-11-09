@@ -1,12 +1,37 @@
 {
-  "name": "Vishwa Custom Tizen Repo",
-  "version": 1,
+  "name": "Ultimate Tizen CloudStream Repo",
+  "version": 2,
   "manifestVersion": 1,
   "providers": [
     {
-      "name": "Multi-Source Streamer",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/multisource.js",
-      "type": "hybrid"
+      "id": "torrentio",
+      "name": "Global Movies & Series (Torrentio)",
+      "url": "https://raw.githubusercontent.com/YOUR_USERNAME/tizen-stream-repo/main/providers/torrentio.js",
+      "type": "torrent"
+    },
+    {
+      "id": "tamilmv",
+      "name": "TamilMV & TamilBlasters",
+      "url": "https://raw.githubusercontent.com/YOUR_USERNAME/tizen-stream-repo/main/providers/tamilmv.js",
+      "type": "torrent"
+    },
+    {
+      "id": "hianime",
+      "name": "HiAnime (Sub & Dub)",
+      "url": "https://raw.githubusercontent.com/YOUR_USERNAME/tizen-stream-repo/main/providers/hianime.js",
+      "type": "direct"
+    },
+    {
+      "id": "desicinemas",
+      "name": "DesiCinemas (Indian Movies)",
+      "url": "https://raw.githubusercontent.com/YOUR_USERNAME/tizen-stream-repo/main/providers/desicinemas.js",
+      "type": "direct"
+    },
+    {
+      "id": "uhdmovies",
+      "name": "UHDMovies (4K / 1080p DDL)",
+      "url": "https://raw.githubusercontent.com/YOUR_USERNAME/tizen-stream-repo/main/providers/uhdmovies.js",
+      "type": "direct"
     }
   ]
 }
