@@ -1,0 +1,12 @@
+{
+  "name": "Vishwa Custom Tizen Repo",
+  "version": 1,
+  "manifestVersion": 1,
+  "providers": [
+    {
+      "name": "Multi-Source Streamer",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/multisource.js",
+      "type": "hybrid"
+    }
+  ]
+}
