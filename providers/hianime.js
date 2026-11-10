@@ -1,70 +1,33 @@
+import torrentio from "./torrentio.js";
+
 export default {
-    name: "HiAnime",
-    baseUrl: "https://hianime.to",
-    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+  id: "hianime",
+  name: "HiAnime",
 
-    async getHomeFeed() {
-        const res = await fetch(`${this.baseUrl}/home`, { headers: this.headers });
-        const html = await res.text();
-        return this.parseCards(html);
-    },
+  ANIME_CATALOG: [
+    { id: "tt0988824", title: "Naruto: Shippuden", year: "2007", rating: "8.7", poster: "https://images.metahub.space/poster/medium/tt0988824/img", language: "Japanese / English" },
+    { id: "tt2560140", title: "Attack on Titan", year: "2013", rating: "9.1", poster: "https://images.metahub.space/poster/medium/tt2560140/img", language: "Japanese / English" },
+    { id: "tt9335498", title: "Demon Slayer: Kimetsu no Yaiba", year: "2019", rating: "8.6", poster: "https://images.metahub.space/poster/medium/tt9335498/img", language: "Japanese / English / Tamil" },
+    { id: "tt12343534", title: "Jujutsu Kaisen", year: "2020", rating: "8.5", poster: "https://images.metahub.space/poster/medium/tt12343534/img", language: "Japanese / English" },
+    { id: "tt5311514", title: "Your Name (Kimi no Na wa)", year: "2016", rating: "8.4", poster: "https://images.metahub.space/poster/medium/tt5311514/img", language: "Japanese / English" },
+    { id: "tt11032374", title: "Demon Slayer: Mugen Train", year: "2020", rating: "8.2", poster: "https://images.metahub.space/poster/medium/tt11032374/img", language: "Japanese / English / Tamil" }
+  ],
 
-    async search(query) {
-        const res = await fetch(`${this.baseUrl}/search?keyword=${encodeURIComponent(query)}`, { headers: this.headers });
-        const html = await res.text();
-        return this.parseCards(html);
-    },
+  async getHomeFeed() {
+    return this.ANIME_CATALOG.map(a => ({
+      ...a,
+      imdbId: a.id,
+      provider: "HiAnime"
+    }));
+  },
 
-    parseCards(html) {
-        const doc = new DOMParser().parseFromString(html, "text/html");
-        const items = [];
-        doc.querySelectorAll(".flw-item").forEach(el => {
-            const a = el.querySelector(".film-name a");
-            const img = el.querySelector(".film-poster-img");
-            if (a) {
-                items.push({
-                    id: a.getAttribute("href"),
-                    title: a.textContent.trim(),
-                    poster: img?.getAttribute("data-src") || img?.getAttribute("src") || ""
-                });
-            }
-        });
-        return items;
-    },
-
-    async getStreams(path) {
-        const idMatch = path.match(/-(\d+)(\?|$)/);
-        if (!idMatch) return [];
-        const animeId = idMatch[1];
-
-        const epRes = await fetch(`${this.baseUrl}/ajax/v2/episode/list/${animeId}`, { headers: this.headers });
-        const epJson = await epRes.json();
-        const epDoc = new DOMParser().parseFromString(epJson.html, "text/html");
-        const firstEpId = epDoc.querySelector(".ssl-item.ep-item")?.getAttribute("data-id");
-        if (!firstEpId) return [];
-
-        const srvRes = await fetch(`${this.baseUrl}/ajax/v2/episode/servers?episodeId=${firstEpId}`, { headers: this.headers });
-        const srvJson = await srvRes.json();
-        const srvDoc = new DOMParser().parseFromString(srvJson.html, "text/html");
-        const serverId = srvDoc.querySelector(".server-item")?.getAttribute("data-id");
-        if (!serverId) return [];
-
-        const srcRes = await fetch(`${this.baseUrl}/ajax/v2/episode/sources?id=${serverId}`, { headers: this.headers });
-        const srcData = await srcRes.json();
-        if (!srcData.link) return [];
-
-        const embedRes = await fetch(srcData.link, { headers: this.headers });
-        const embedText = await embedRes.text();
-        const m3u8Match = embedText.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
-
-        if (m3u8Match) {
-            return [{
-                label: "Episode 1 - Direct HLS (1080p)",
-                url: m3u8Match[1],
-                type: "direct",
-                subtitles: []
-            }];
-        }
-        return [];
-    }
+  async getStreams(imdbId) {
+    const streams = await torrentio.getStreams(imdbId);
+    return streams.map(s => ({
+      ...s,
+      provider: "HiAnime",
+      languages: s.languages.includes("Japanese") ? s.languages : ["Japanese", ...s.languages],
+      languageBadge: `Japanese + ${s.languageBadge}`
+    }));
+  }
 };
