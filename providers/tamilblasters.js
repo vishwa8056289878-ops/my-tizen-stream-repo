@@ -1,31 +1,21 @@
 import torrentio from "./torrentio.js";
-import tamilmv from "./tamilmv.js";
 
 export default {
   id: "tamilblasters",
   name: "TamilBlasters HD",
 
-  async getHomeFeed() {
-    const feed = await tamilmv.getHomeFeed();
-    return feed.map(item => ({
-      ...item,
-      provider: "TamilBlasters"
-    }));
-  },
-
-  async getStreams(imdbId, movieTitle = "") {
-    const rawStreams = await torrentio.getStreams(imdbId, { preferredLang: "Tamil" });
-    return rawStreams.map((s, idx) => {
-      const langs = s.languages.includes("Tamil") ? s.languages : ["Tamil", ...s.languages];
-      return {
+  async getStreams(imdbId, title = "Movie") {
+    const baseStreams = await torrentio.getStreams(imdbId);
+    return baseStreams
+      .filter(s => s.languages.includes("Tamil") || /tamil|multi|dual/i.test(s.title))
+      .map((s, idx) => ({
         ...s,
         id: `${imdbId}-tb-${idx}`,
         provider: "TamilBlasters",
-        indexer: `TamilBlasters • ${s.indexer}`,
+        indexer: "TamilBlasters Official",
         title: `[TamilBlasters] ${s.title}`,
-        languages: langs,
-        languageBadge: langs.join(" + ")
-      };
-    });
+        languages: s.languages.includes("Tamil") ? s.languages : ["Tamil", ...s.languages],
+        audioLabel: s.languages.includes("Tamil") ? s.audioLabel : `Tamil • ${s.audioLabel}`
+      }));
   }
 };
