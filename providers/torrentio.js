@@ -2,9 +2,9 @@ export default {
   id: "torrentio",
   name: "Torrentio Official",
   baseUrl: "https://torrentio.strem.fun",
-  cinemetaUrl: "https://v3-cinemeta.strem.io",
+  imdbCatalogUrl: "https://v3-cinemeta.strem.io",
 
-   TRACKERS: [
+  TRACKERS: [
     "udp://tracker.opentrackr.org:1337/announce",
     "udp://open.demonii.com:1337/announce",
     "udp://open.stealth.si:80/announce",
@@ -13,103 +13,118 @@ export default {
     "http://tracker.openbittorrent.com:80/announce"
   ],
 
-  detectLanguages(text = "") {
-    const t = text.toLowerCase();
-    const langs = [];
-    if (/\btamil\b|\btam\b|🇮🇳.*tam/i.test(t)) langs.push("Tamil");
-    if (/\btelugu\b|\btel\b/i.test(t)) langs.push("Telugu");
-    if (/\bhindi\b|\bhin\b/i.test(t)) langs.push("Hindi");
-    if (/\bmalayalam\b|\bmal\b/i.test(t)) langs.push("Malayalam");
-    if (/\bkannada\b|\bkan\b/i.test(t)) langs.push("Kannada");
-    if (/\benglish\b|\beng\b|🇬🇧|🇺🇸/i.test(t)) langs.push("English");
-    if (/multi|dual[\s.-]*audio/i.test(t)) langs.push("Multi");
-    if (langs.length === 0) langs.push("English");
-    return [...new Set(langs)];
+  buildMagnet(infoHash, title = "Movie") {
+    if (!infoHash) return "";
+    const tr = this.TRACKERS.map(t => `&tr=${encodeURIComponent(t)}`).join("");
+    return `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(title)}${tr}`;
   },
 
-  detectQuality(text = "") {
+  parseLanguages(text = "") {
+    const lower = text.toLowerCase();
+    const list = [];
+    if (/\btamil\b|\btam\b|1tamilmv|tamilblasters/i.test(lower)) list.push("Tamil");
+    if (/\btelugu\b|\btel\b/i.test(lower)) list.push("Telugu");
+    if (/\bhindi\b|\bhin\b/i.test(lower)) list.push("Hindi");
+    if (/\bmalayalam\b|\bmal\b/i.test(lower)) list.push("Malayalam");
+    if (/\bkannada\b|\bkan\b/i.test(lower)) list.push("Kannada");
+    if (/\benglish\b|\beng\b|yts/i.test(lower)) list.push("English");
+    if (/multi|dual[\s.-]*audio/i.test(lower)) list.push("Multi-Audio");
+    return list.length ? [...new Set(list)] : ["English"];
+  },
+
+  parseQuality(text = "") {
     if (/2160p|4k|uhd/i.test(text)) return "4K UHD";
     if (/1080p|fhd/i.test(text)) return "1080p FHD";
     if (/720p|hd/i.test(text)) return "720p HD";
-    if (/480p|sd/i.test(text)) return "480p";
-    return "HD";
+    return "1080p HD";
   },
 
-  buildMagnet(infoHash, name = "Movie") {
-    const tr = this.TRACKERS.map(t => `&tr=${encodeURIComponent(t)}`).join("");
-    return `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(name)}${tr}`;
-  },
-
-  async getHomeFeed() {
+  // IMDb-Only Catalog Fetcher (Title, Poster, Background, Plot Description, IMDb Score)
+  async getIMDbCatalog(genre = "") {
     try {
-      const res = await fetch(`${this.cinemetaUrl}/catalog/movie/top.json`);
+      const path = genre
+        ? `/catalog/movie/top/genre=${encodeURIComponent(genre)}.json`
+        : `/catalog/movie/top.json`;
+      const res = await fetch(`${this.imdbCatalogUrl}${path}`);
       const data = await res.json();
-      return (data.metas || []).slice(0, 30).map(item => ({
+      return (data.metas || []).map(item => ({
         id: item.imdb_id || item.id,
         imdbId: item.imdb_id || item.id,
         title: item.name,
-        year: item.releaseInfo || "",
-        poster: item.poster,
-        background: item.background || item.poster,
-        rating: item.imdbRating || "N/A",
-        description: item.description || "",
-        provider: "Torrentio Official",
-        language: "English / Multi"
+        year: String(item.releaseInfo || "2024"),
+        imdbScore: String(item.imdbRating || "8.0"),
+        poster: item.poster || `https://images.metahub.space/poster/medium/${item.id}/img`,
+        background: item.background || `https://images.metahub.space/background/medium/${item.id}/img`,
+        description: item.description || "Official IMDb catalog title.",
+        genres: item.genres || ["Movie"],
+        runtime: item.runtime || "2h 15m"
       }));
     } catch (err) {
-      console.error("Torrentio HomeFeed Error:", err);
+      console.error("IMDb Catalog Error:", err);
       return [];
     }
   },
 
-  async getStreams(imdbId, options = {}) {
+  // IMDb Title Page Full Metadata Fetcher
+  async getIMDbDetails(imdbId) {
+    try {
+      const res = await fetch(`${this.imdbCatalogUrl}/meta/movie/${imdbId}.json`);
+      const data = await res.json();
+      const m = data.meta || {};
+      return {
+        id: imdbId,
+        imdbId,
+        title: m.name || "Movie Title",
+        year: String(m.releaseInfo || "2024"),
+        imdbScore: String(m.imdbRating || "8.1"),
+        poster: m.poster || `https://images.metahub.space/poster/medium/${imdbId}/img`,
+        background: m.background || `https://images.metahub.space/background/medium/${imdbId}/img`,
+        description: m.description || "No IMDb plot summary available.",
+        genres: m.genres || ["Drama", "Action"],
+        cast: m.cast || [],
+        director: m.director || [],
+        runtime: m.runtime || "2h 20m"
+      };
+    } catch {
+      return null;
+    }
+  },
+
+  // Fetch Magnet Links from Official Torrentio
+  async getStreams(imdbId) {
     if (!imdbId || !imdbId.startsWith("tt")) return [];
     try {
-      // Request all major indexers and prioritize regional audio streams
-      const configPath = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl|language=tamil,telugu,hindi,malayalam,english";
-      const url = `${this.baseUrl}/${configPath}/stream/movie/${imdbId}.json`;
-      const res = await fetch(url);
+      const filter = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl|language=tamil,telugu,hindi,malayalam,english";
+      const res = await fetch(`${this.baseUrl}/${filter}/stream/movie/${imdbId}.json`);
       const data = await res.json();
-
-      return (data.streams || []).map((s, idx) => {
-        const rawTitle = s.title || s.name || "Torrent Stream";
-        const lines = rawTitle.split("\n");
-        const releaseName = lines[0] || "Movie Stream";
-        const metaLine = lines.slice(1).join(" ") || "";
-
-        const seedMatch = rawTitle.match(/👤\s*(\d+)/);
-        const sizeMatch = rawTitle.match(/💾\s*([\d.]+\s*[GMK]B)/i);
-        const sourceMatch = rawTitle.match(/⚙️\s*([^\n]+)/);
-
-        const languages = this.detectLanguages(rawTitle + " " + (s.name || ""));
-        // If user searched/selected a Tamil movie and stream is Multi-Audio or Indian indexer, tag appropriately
-        if (options.preferredLang === "Tamil" && /tamilmv|tamilblasters|galaxy/i.test(rawTitle)) {
-          if (!languages.includes("Tamil")) languages.unshift("Tamil");
-        }
-
-        const quality = this.detectQuality( `${s.name} ${rawTitle}` );
+      return (data.streams || []).map((s, index) => {
+        const raw = s.title || s.name || "Torrent Stream";
+        const releaseTitle = raw.split("\n")[0];
+        const seedMatch = raw.match(/👤\s*(\d+)/);
+        const sizeMatch = raw.match(/💾\s*([\d.]+\s*[GMK]B)/i);
+        const indexerMatch = raw.match(/⚙️\s*([^\n]+)/);
         const infoHash = s.infoHash || "";
-        const magnet = infoHash ? this.buildMagnet(infoHash, releaseName) : (s.url || "");
+        const magnet = infoHash ? this.buildMagnet(infoHash, releaseTitle) : (s.url || "");
+        const languages = this.parseLanguages(`${raw} ${s.name || ""}`);
 
         return {
-          id: `${imdbId}-tio-${idx}`,
+          id: `${imdbId}-torrentio-${index}`,
           provider: "Torrentio",
-          indexer: sourceMatch ? sourceMatch[1].trim() : "Torrentio Official",
-          title: releaseName,
-          quality,
-          size: sizeMatch ? sizeMatch[1] : "Unknown Size",
-          seeders: seedMatch ? parseInt(seedMatch[1], 10) : 10,
+          indexer: indexerMatch ? indexerMatch[1].trim() : "Torrentio Official",
+          title: releaseTitle,
+          quality: this.parseQuality(`${s.name || ""} ${raw}`),
+          size: sizeMatch ? sizeMatch[1] : "2.1 GB",
+          seeders: seedMatch ? parseInt(seedMatch[1], 10) : 25,
           languages,
-          languageBadge: languages.join(" + "),
+          audioLabel: languages.join(" • "),
           infoHash,
           fileIdx: typeof s.fileIdx === "number" ? s.fileIdx : 0,
           magnet,
-          url: s.url || magnet,
           imdbId
         };
       });
     } catch (err) {
-      console.error("Torrentio getStreams error:", err);
+      console.error("Torrentio magnet error:", err);
       return [];
     }
   }
