@@ -1,48 +1,52 @@
 {
-  "name": "Tizen Classic Cinema Community Repo",
-  "version": 2,
+  "name": "NEON STREAM IMDb Unified Repository",
+  "version": 4,
+  "author": "vishwa8056289878-ops",
+  "description": "IMDb-ID based movie and TV metadata with an authorized playback API adapter",
+  "metadata": {
+    "provider": "Cinemeta",
+    "baseUrl": "https://v3-cinemeta.strem.io",
+    "note": "Metadata discovery only; playable sources must come from an authorized playback API configured in unified.js."
+  },
   "providers": [
     {
-      "id": "torrentio",
-      "name": "Torrentio Official",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/torrentio.js",
-      "type": "torrent",
-      "languages": ["Tamil", "English", "Hindi", "Telugu", "Malayalam", "Multi"]
-    },
-    {
-      "id": "tamilmv",
-      "name": "1TamilMV Official",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/tamilmv.js",
-      "type": "torrent",
-      "languages": ["Tamil", "Telugu", "Hindi", "Malayalam"]
-    },
-    {
-      "id": "tamilblasters",
-      "name": "TamilBlasters HD",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/tamilblasters.js",
-      "type": "torrent",
-      "languages": ["Tamil", "Telugu", "Malayalam", "Hindi"]
-    },
-    {
-      "id": "uhdmovies",
-      "name": "UHDMovies 4K / IMAX",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/uhdmovies.js",
-      "type": "uhd",
-      "languages": ["English", "Tamil", "Hindi", "Multi"]
-    },
-    {
-      "id": "yts",
-      "name": "YTS Movies",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/yts.js",
-      "type": "torrent",
-      "languages": ["English"]
-    },
-    {
-      "id": "hianime",
-      "name": "HiAnime / Nyaa",
-      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/hianime.js",
-      "type": "anime",
-      "languages": ["Japanese", "English", "Tamil"]
+      "id": "neon-unified",
+      "name": "NEON STREAM IMDb Unified",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/unified.js",
+      "type": "unified",
+      "languages": [
+        "Tamil",
+        "English",
+        "Telugu",
+        "Hindi",
+        "Malayalam",
+        "Japanese",
+        "Multi"
+      ],
+      "mediaTypes": [
+        "movie",
+        "series",
+        "anime"
+      ],
+      "resolutions": [
+        "480p",
+        "720p",
+        "1080p",
+        "1440p",
+        "2160p"
+      ],
+      "hdrFormats": [
+        "SDR",
+        "HDR",
+        "HDR10",
+        "HDR10+",
+        "Dolby Vision"
+      ],
+      "codecs": [
+        "H264",
+        "H265",
+        "AV1"
+      ]
     }
   ]
 }
