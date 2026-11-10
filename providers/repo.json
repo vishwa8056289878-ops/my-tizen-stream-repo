@@ -1,52 +1,49 @@
 {
-  "name": "NEON STREAM IMDb Unified Repository",
-  "version": 4,
-  "author": "vishwa8056289878-ops",
-  "description": "IMDb-ID based movie and TV metadata with an authorized playback API adapter",
-  "metadata": {
-    "provider": "Cinemeta",
-    "baseUrl": "https://v3-cinemeta.strem.io",
-    "note": "Metadata discovery only; playable sources must come from an authorized playback API configured in unified.js."
-  },
+  "name": "Tizen IMDb & Magnet Streaming Repo",
+  "version": 3,
+  "catalogSource": "https://v3-cinemeta.strem.io",
   "providers": [
     {
-      "id": "neon-unified",
-      "name": "NEON STREAM IMDb Unified",
+      "id": "unified",
+      "name": "Unified IMDb + All Magnet Providers",
       "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/unified.js",
-      "type": "unified",
-      "languages": [
-        "Tamil",
-        "English",
-        "Telugu",
-        "Hindi",
-        "Malayalam",
-        "Japanese",
-        "Multi"
-      ],
-      "mediaTypes": [
-        "movie",
-        "series",
-        "anime"
-      ],
-      "resolutions": [
-        "480p",
-        "720p",
-        "1080p",
-        "1440p",
-        "2160p"
-      ],
-      "hdrFormats": [
-        "SDR",
-        "HDR",
-        "HDR10",
-        "HDR10+",
-        "Dolby Vision"
-      ],
-      "codecs": [
-        "H264",
-        "H265",
-        "AV1"
-      ]
+      "type": "unified"
+    },
+    {
+      "id": "torrentio",
+      "name": "Torrentio Official",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/torrentio.js",
+      "type": "torrent"
+    },
+    {
+      "id": "tamilmv",
+      "name": "1TamilMV Official",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/tamilmv.js",
+      "type": "torrent"
+    },
+    {
+      "id": "tamilblasters",
+      "name": "TamilBlasters HD",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/tamilblasters.js",
+      "type": "torrent"
+    },
+    {
+      "id": "uhdmovies",
+      "name": "UHDMovies 4K",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/uhdmovies.js",
+      "type": "torrent"
+    },
+    {
+      "id": "yts",
+      "name": "YTS BluRay",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/yts.js",
+      "type": "torrent"
+    },
+    {
+      "id": "hianime",
+      "name": "HiAnime / Nyaa",
+      "url": "https://raw.githubusercontent.com/vishwa8056289878-ops/my-tizen-stream-repo/main/providers/hianime.js",
+      "type": "anime"
     }
   ]
 }
